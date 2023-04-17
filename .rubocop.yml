@@ -1,0 +1,30 @@
+AllCops:
+  NewCops: enable
+  SuggestExtensions: false
+  TargetRubyVersion: 2.7
+
+Layout:
+  Enabled: false
+
+Layout/EmptyLineAfterMagicComment:
+  Enabled: true
+
+Lint/MissingSuper:
+  Enabled: false
+
+Metrics:
+  Enabled: false
+
+Naming:
+  Enabled: false
+
+Style:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  Exclude:
+    - spec/**/*
+
+Style/StringLiterals:
+  Enabled: true
