@@ -25,7 +25,8 @@ end
 
 module Sinatra
   module Templates
-    def phlex(obj)
+    def phlex(obj, content_type: nil)
+      self.content_type(content_type) if content_type
       obj.call(view_context: self)
     end
   end
