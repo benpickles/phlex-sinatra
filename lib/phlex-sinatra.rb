@@ -26,6 +26,7 @@ end
 module Sinatra
   module Templates
     def phlex(obj, content_type: nil)
+      content_type ||= :svg if obj.is_a?(Phlex::SVG)
       self.content_type(content_type) if content_type
       obj.call(view_context: self)
     end
