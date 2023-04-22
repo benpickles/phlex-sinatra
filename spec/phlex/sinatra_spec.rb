@@ -2,7 +2,7 @@
 
 class FooView < Phlex::HTML
   def template
-    plain 'foo'
+    p { 'foo' }
   end
 end
 
@@ -35,10 +35,11 @@ RSpec.describe Phlex::Sinatra do
     TestApp
   end
 
-  it 'works as normal when not using the #phlex helper method' do
-    get '/foo'
-
-    expect(last_response.body).to eql('foo')
+  context 'without the #phlex helper method' do
+    it 'the Phlex view is rendered as expected' do
+      get '/foo'
+      expect(last_response.body).to eql('<p>foo</p>')
+    end
   end
 
   context 'using the #phlex helper method' do
