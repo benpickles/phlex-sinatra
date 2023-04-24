@@ -20,6 +20,12 @@ class LinkView < Phlex::HTML
   end
 end
 
+class MoreDetailsView < Phlex::HTML
+  def template
+    pre { helpers.params.inspect }
+  end
+end
+
 class SvgElem < Phlex::SVG
   def template
     svg { rect(width: 100, height: 100) }
@@ -48,6 +54,10 @@ class TestApp < Sinatra::Application
 
   get '/link' do
     phlex LinkView.new(params[:full])
+  end
+
+  get '/more' do
+    phlex MoreDetailsView.new
   end
 
   get '/svg' do
@@ -146,6 +156,15 @@ RSpec.describe Phlex::Sinatra do
       expect {
         get '/error', { type: 'phlex-class' }
       }.to raise_error(Phlex::Sinatra::TypeError, /FooView/)
+    end
+  end
+
+  context "using Sinatra's other helpers" do
+    it 'works' do
+      get '/more', { a: 1, b: 2 }
+
+      expect(last_response.body).to eql('<pre>{&quot;a&quot;=&gt;&quot;1&quot;, &quot;b&quot;=&gt;&quot;2&quot;}</pre>')
+      expect(last_response.media_type).to eql('text/html')
     end
   end
 end
