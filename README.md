@@ -34,6 +34,14 @@ class MyView < Phlex::HTML
 end
 ```
 
+You can also pass an alternative content type – which defaults to `:html` (or `:svg` for a `Phlex::SVG` instance):
+
+```ruby
+get '/foo' do
+  phlex MyView.new, content_type: :xml
+end
+```
+
 ## Why?
 
 It might not seem obvious at first why you'd use `url()` at all given that you mostly just pass the string you want to output and then probably `false` so the scheme/host isn't included.
@@ -42,13 +50,13 @@ There are a couple of reasons:
 
 1. **Linking to a full URL**
 
-   Sometimes you need to link to a page on the site using its full URL -- for instance within a feed or for an `og:image` social media preview image link.
+   Sometimes you need to link to a page on the site using its full URL – for instance within a feed or for an `og:image` social media preview image link.
 
 2. **Awareness that the app is being served from a subdirectory**
 
-   This isn't something you encounter very often in a standard Sinatra app but you hit it quite quickly if you're using [Parklife](https://github.com/benpickles/parklife) to generate a static build which you host on GitHub Pages -- which is exactly what prompted me to write this integration.
+   This isn't something you encounter very often in a standard Sinatra app but you hit it quite quickly if you're using [Parklife](https://github.com/benpickles/parklife) to generate a static build which you host on GitHub Pages – which is exactly what prompted me to write this integration.
 
-   In this case by using the `url()` helper you won’t have to change anything when switching between serving the app from `/` in development and hosting it at `/my-repository/` in production -- internal links to other pages/stylesheets/etc will always be correct regardless.
+   In this case by using the `url()` helper you won’t have to change anything when switching between serving the app from `/` in development and hosting it at `/my-repository/` in production – internal links to other pages/stylesheets/etc will always be correct regardless.
 
 ## Contributing
 
