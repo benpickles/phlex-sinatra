@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 class FooView < Phlex::HTML
+  def initialize(text = 'foo')
+    @text = text
+  end
+
   def template
-    p { 'foo' }
+    p { @text }
   end
 end
 
@@ -24,6 +28,19 @@ end
 
 class TestApp < Sinatra::Application
   set :environment, :test
+
+  get '/error' do
+    obj = case params[:type]
+    when 'phlex-class'
+      FooView
+    when 'string'
+      FooView.call
+    when 'string-long'
+      FooView.call(('a'..'z').to_a.join(' '))
+    end
+
+    phlex obj
+  end
 
   get '/foo' do
     FooView.call
@@ -109,6 +126,26 @@ RSpec.describe Phlex::Sinatra do
 
       expect(last_response.body).to start_with('<svg><rect')
       expect(last_response.media_type).to eql('text/plain')
+    end
+  end
+
+  context "when the thing passed to #phlex isn't a Phlex instance" do
+    it 'raises an error and displays the input string' do
+      expect {
+        get '/error', { type: 'string' }
+      }.to raise_error(Phlex::Sinatra::TypeError, %r{"<p>foo</p>"})
+    end
+
+    it "limits the input when it's a long string" do
+      expect {
+        get '/error', { type: 'string-long' }
+      }.to raise_error(Phlex::Sinatra::TypeError, /"<p>a b c d e f g h i j k l m n …/)
+    end
+
+    it 'raises an error and displays the input class' do
+      expect {
+        get '/error', { type: 'phlex-class' }
+      }.to raise_error(Phlex::Sinatra::TypeError, /FooView/)
     end
   end
 end

@@ -5,6 +5,18 @@ require_relative 'phlex/sinatra/version'
 
 module Phlex
   module Sinatra
+    Error = Class.new(StandardError)
+
+    class TypeError < Error
+      MAX_SIZE = 32
+
+      def initialize(obj)
+        content = obj.inspect
+        content = content[0, MAX_SIZE] + '…' if content.size > MAX_SIZE
+        super "Expected a Phlex instance, received #{content}"
+      end
+    end
+
     module SGML
       module Overrides
         def helpers
@@ -26,8 +38,11 @@ end
 module Sinatra
   module Templates
     def phlex(obj, content_type: nil)
+      raise Phlex::Sinatra::TypeError.new(obj) unless obj.is_a?(Phlex::SGML)
+
       content_type ||= :svg if obj.is_a?(Phlex::SVG)
       self.content_type(content_type) if content_type
+
       obj.call(view_context: self)
     end
   end
