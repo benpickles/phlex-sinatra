@@ -42,7 +42,56 @@ get '/foo' do
 end
 ```
 
-## Why?
+## Streaming
+
+Streaming a Phlex view can be enabled by passing `stream: true` which will cause Phlex to automatically write to the response after the closing `</head>` and buffer the remaining content:
+
+```ruby
+get '/foo' do
+  phlex MyView.new, stream: true
+end
+```
+
+Even with no further intervention this small change means that the browser will receive the complete `<head>` as quickly as possible and can start fetching and processing its external resources while waiting for the rest of the page to download.
+
+You can also manually flush the contents of the buffer at any point using Phlex's `#flush` method:
+
+```ruby
+class Layout < Phlex::HTML
+  def template(&)
+    doctype
+    html {
+      head {
+        # All the usual stuff: links to external stylesheets and JavaScript etc.
+      }
+      # Phlex will automatically flush to the response at this point which will
+      # benefit all pages that opt in to streaming.
+      body {
+        # Standard site header and navigation.
+        render Header.new
+
+        yield_content(&)
+      }
+    }
+  end
+end
+
+class MyView < Phlex::HTML
+  def template
+    render Layout.new {
+      # Knowing that this page can take a while to generate we can choose to
+      # flush here so the browser can render the site header while downloading
+      # the rest of the page - which should help minimise the First Contentful
+      # Paint metric.
+      flush
+
+      # The rest of the big long page...
+    }
+  end
+end
+```
+
+## Why do I need Sinatra's `url()` helper?
 
 It might not seem obvious at first why you'd use `url()` at all given that you mostly just pass the string you want to output and then probably `false` so the scheme/host isn't included.
 
@@ -54,7 +103,7 @@ There are a couple of reasons:
 
 2. **Awareness that the app is being served from a subdirectory**
 
-   This isn't something you encounter very often in a standard Sinatra app but you hit it quite quickly if you're using [Parklife](https://github.com/benpickles/parklife) to generate a static build which you host on GitHub Pages – which is exactly what prompted me to write this integration.
+   This isn't something you encounter very often in a standard Sinatra app but you hit it quite quickly if you're using [Parklife](https://github.com/benpickles/parklife) to generate a static build hosted on GitHub Pages – which is exactly what prompted me to write this integration.
 
    In this case by using the `url()` helper you won’t have to change anything when switching between serving the app from `/` in development and hosting it at `/my-repository/` in production – internal links to other pages/stylesheets/etc will always be correct regardless.
 
