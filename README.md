@@ -58,7 +58,7 @@ You can also manually flush the contents of the buffer at any point using Phlex'
 
 ```ruby
 class Layout < Phlex::HTML
-  def template(&)
+  def template(&block)
     doctype
     html {
       head {
@@ -70,7 +70,7 @@ class Layout < Phlex::HTML
         # Standard site header and navigation.
         render Header.new
 
-        yield_content(&)
+        yield_content(&block)
       }
     }
   end
