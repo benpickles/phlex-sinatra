@@ -3,6 +3,7 @@
 require 'capybara/rspec'
 require 'phlex-sinatra'
 require 'rack/test'
+require 'rackup'
 require 'sinatra/base'
 
 RSpec.configure do |config|

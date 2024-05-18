@@ -8,6 +8,7 @@ gemspec
 gem 'capybara'
 gem 'puma'
 gem 'rack-test'
+gem 'rackup'
 gem 'rake'
 gem 'rspec'
 gem 'rubocop'
