@@ -60,8 +60,21 @@ class TestApp < Sinatra::Application
     phlex MoreDetailsView.new
   end
 
+  get '/more-with-layout' do
+    layout = params[:layout] == 'true' ? true : :layout_more
+    phlex MoreDetailsView.new, layout: layout
+  end
+
+  get '/stream-with-layout' do
+    phlex FooView.new, layout: true, stream: true
+  end
+
   get '/svg' do
     phlex SvgElem.new
+  end
+
+  get '/svg-with-layout' do
+    phlex SvgElem.new, layout: true
   end
 
   get '/svg/plain' do
@@ -123,15 +136,42 @@ RSpec.describe Phlex::Sinatra do
     end
   end
 
-  context 'with a Phlex::SVG view' do
-    it 'responds with the correct content type by default' do
+  context 'when a layout is passed' do
+    it 'uses the specified layout' do
+      get '/more-with-layout'
+
+      expect(last_response.body).to start_with('<div><pre>')
+    end
+
+    it "uses Sinatra's default layout when `true`" do
+      get '/more-with-layout', { layout: 'true' }
+
+      expect(last_response.body).to start_with('<main><pre>')
+    end
+
+    it 'raises an error stream=true' do
+      expect {
+        get('/stream-with-layout')
+      }.to raise_error(Phlex::Sinatra::IncompatibleOptionError)
+    end
+  end
+
+  context 'when passed a Phlex::SVG view' do
+    it 'defaults to SVG content type' do
       get '/svg'
 
       expect(last_response.body).to start_with('<svg><rect')
       expect(last_response.media_type).to eql('image/svg+xml')
     end
 
-    it 'can also specify a content type' do
+    it 'does not default to SVG content type if a layout is specified' do
+      get '/svg-with-layout'
+
+      expect(last_response.body).to start_with('<main><svg><rect')
+      expect(last_response.media_type).to eql('text/html')
+    end
+
+    it 'can also have its content type specified' do
       get '/svg/plain'
 
       expect(last_response.body).to start_with('<svg><rect')
