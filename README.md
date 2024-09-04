@@ -24,7 +24,7 @@ You can now use Sinatra's `url()` helper method directly and its other methods (
 
 ```ruby
 class MyView < Phlex::HTML
-  def template
+  def view_template
     h1 { 'Phlex / Sinatra integration' }
     p {
       a(href: url('/foo', false)) { 'link to foo' }
@@ -58,7 +58,7 @@ You can also manually flush the contents of the buffer at any point using Phlex'
 
 ```ruby
 class Layout < Phlex::HTML
-  def template(&block)
+  def view_template(&block)
     doctype
     html {
       head {
@@ -77,7 +77,7 @@ class Layout < Phlex::HTML
 end
 
 class MyView < Phlex::HTML
-  def template
+  def view_template
     render Layout.new {
       # Knowing that this page can take a while to generate we can choose to
       # flush here so the browser can render the site header while downloading

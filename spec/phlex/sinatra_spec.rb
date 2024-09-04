@@ -5,7 +5,7 @@ class FooView < Phlex::HTML
     @text = text
   end
 
-  def template
+  def view_template
     p { @text }
   end
 end
@@ -15,19 +15,19 @@ class LinkView < Phlex::HTML
     @full = full
   end
 
-  def template
+  def view_template
     a(href: url('/bar', @full)) { 'link' }
   end
 end
 
 class MoreDetailsView < Phlex::HTML
-  def template
+  def view_template
     pre { helpers.params.inspect }
   end
 end
 
 class StreamingView < Phlex::HTML
-  def template
+  def view_template
     html {
       head {
         title { 'Streaming' }
@@ -42,7 +42,7 @@ class StreamingView < Phlex::HTML
 end
 
 class SvgElem < Phlex::SVG
-  def template
+  def view_template
     svg { rect(width: 100, height: 100) }
   end
 end
