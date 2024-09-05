@@ -65,6 +65,10 @@ class TestApp < Sinatra::Application
     phlex MoreDetailsView.new, layout: layout
   end
 
+  get '/more-with-haml-layout' do
+    phlex MoreDetailsView.new, layout: true, layout_engine: :haml
+  end
+
   get '/stream-with-layout' do
     phlex FooView.new, layout: true, stream: true
   end
@@ -153,6 +157,12 @@ RSpec.describe Phlex::Sinatra do
       expect {
         get('/stream-with-layout')
       }.to raise_error(Phlex::Sinatra::IncompatibleOptionError)
+    end
+
+    it 'works with non-ERB templates' do
+      get '/more-with-haml-layout'
+
+      expect(last_response.body).to start_with("<article>\n<pre>")
     end
   end
 

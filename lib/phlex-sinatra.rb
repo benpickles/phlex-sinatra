@@ -38,7 +38,13 @@ end
 
 module Sinatra
   module Templates
-    def phlex(obj, content_type: nil, layout: false, stream: false)
+    def phlex(
+      obj,
+      content_type: nil,
+      layout: false,
+      layout_engine: :erb,
+      stream: false
+    )
       raise Phlex::Sinatra::TypeError.new(obj) unless obj.is_a?(Phlex::SGML)
 
       content_type ||= :svg if obj.is_a?(Phlex::SVG) && !layout
@@ -60,7 +66,7 @@ module Sinatra
         output = obj.call(view_context: self)
 
         if layout
-          render(:erb, layout, { layout: false }) { output }
+          render(layout_engine, layout, { layout: false }) { output }
         else
           output
         end
