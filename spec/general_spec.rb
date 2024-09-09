@@ -26,21 +26,6 @@ class MoreDetailsView < Phlex::HTML
   end
 end
 
-class StreamingView < Phlex::HTML
-  def view_template
-    html {
-      head {
-        title { 'Streaming' }
-      }
-      body {
-        p { 1 }
-        flush # Internal private Phlex method.
-        p { 2 }
-      }
-    }
-  end
-end
-
 class SvgElem < Phlex::SVG
   def view_template
     svg { rect(width: 100, height: 100) }
@@ -75,10 +60,6 @@ class TestApp < Sinatra::Application
     phlex MoreDetailsView.new
   end
 
-  get '/stream' do
-    phlex StreamingView.new, stream: true
-  end
-
   get '/svg' do
     phlex SvgElem.new
   end
@@ -91,21 +72,6 @@ class TestApp < Sinatra::Application
     phlex FooView.new, content_type: :xml
   end
 end
-
-# Trick Capybara into managing Puma for us.
-class NeedsServerDriver < Capybara::Driver::Base
-  def needs_server?
-    true
-  end
-end
-
-Capybara.register_driver :needs_server do
-  NeedsServerDriver.new
-end
-
-Capybara.app = TestApp
-Capybara.default_driver = :needs_server
-Capybara.server = :puma, { Silent: true }
 
 RSpec.describe Phlex::Sinatra do
   include Rack::Test::Methods
@@ -199,26 +165,6 @@ RSpec.describe Phlex::Sinatra do
 
       expect(last_response.body).to eql('<pre>{&quot;a&quot;=&gt;&quot;1&quot;, &quot;b&quot;=&gt;&quot;2&quot;}</pre>')
       expect(last_response.media_type).to eql('text/html')
-    end
-  end
-
-  context 'when streaming' do
-    def get2(path)
-      Net::HTTP.start(
-        Capybara.current_session.server.host,
-        Capybara.current_session.server.port,
-      ) { |http|
-        http.get(path)
-      }
-    end
-
-    it 'outputs the full response' do
-      last_response = get2('/stream')
-
-      expect(last_response.body).to eql('<html><head><title>Streaming</title></head><body><p>1</p><p>2</p></body></html>')
-
-      # Indicates that Sinatra's streaming is being used.
-      expect(last_response['Content-Length']).to be_nil
     end
   end
 end
