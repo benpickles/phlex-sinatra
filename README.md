@@ -42,6 +42,28 @@ get '/foo' do
 end
 ```
 
+## Layout
+
+If your entire view layer uses Phlex then layout will be a part of your component structure but maybe you've got an existing non-Phlex layout or you don't want to use Phlex for _everything_, in which case standard Sinatra layouts are supported.
+
+Pass `layout: true` to wrap the Phlex output with Sinatra's default layout -- a file named "layout.erb" in the configured views directory (ERB is the default) -- or pass a symbol to specify the file:
+
+```ruby
+get '/foo' do
+  # This Phlex view will be wrapped by `views/my_layout.erb`.
+  phlex MyView.new, layout: :my_layout
+end
+```
+
+Other [Sinatra templating languages](https://sinatrarb.com/intro.html#available-template-languages) can be specified via the `layout_engine` keyword:
+
+```ruby
+get '/foo' do
+  # This Phlex view will be wrapped by `views/layout.haml`.
+  phlex MyView.new, layout: true, layout_engine: :haml
+end
+```
+
 ## Streaming
 
 Streaming a Phlex view can be enabled by passing `stream: true` which will cause Phlex to automatically write to the response after the closing `</head>` and buffer the remaining content:
