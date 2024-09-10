@@ -64,6 +64,20 @@ get '/foo' do
 end
 ```
 
+## Using Phlex in other templates
+
+It's also possible to call `phlex` from within other views, for instance an ERB template:
+
+```erb
+<%= phlex MyView.new %>
+```
+
+A `layout` can also be passed:
+
+```erb
+<%= phlex MyView.new, layout: :wrapper %>
+```
+
 ## Streaming
 
 Streaming a Phlex view can be enabled by passing `stream: true` which will cause Phlex to automatically write to the response after the closing `</head>` and buffer the remaining content:

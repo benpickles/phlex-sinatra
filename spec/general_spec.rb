@@ -11,7 +11,7 @@ class FooView < Phlex::HTML
 end
 
 class LinkView < Phlex::HTML
-  def initialize(full)
+  def initialize(full = false)
     @full = full
   end
 
@@ -50,6 +50,14 @@ class TestApp < Sinatra::Application
 
   get '/foo' do
     FooView.call
+  end
+
+  get '/inline' do
+    erb :inline
+  end
+
+  get '/inline_with_layout' do
+    erb :inline_with_layout
   end
 
   get '/link' do
@@ -128,6 +136,20 @@ RSpec.describe Phlex::Sinatra do
 
       expect(last_response.body).to eql('<a href="http://foo.example.com/foo/bar">link</a>')
       expect(last_response.media_type).to eql('text/html')
+    end
+  end
+
+  context 'when #phlex is called from within another view' do
+    it 'works the same' do
+      get '/inline', {}, { 'SCRIPT_NAME' => '/foo' }
+
+      expect(last_response.body).to start_with('<main><a href="/foo/bar">link</a></main>')
+    end
+
+    it 'allows passing a layout' do
+      get '/inline_with_layout'
+
+      expect(last_response.body).to start_with('<main><div><a href="/bar">link</a></div>')
     end
   end
 
