@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'capybara/rspec'
 require 'phlex-sinatra'
 require 'rack/test'
 require 'sinatra/base'

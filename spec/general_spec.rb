@@ -26,21 +26,6 @@ class MoreDetailsView < Phlex::HTML
   end
 end
 
-class StreamingView < Phlex::HTML
-  def view_template
-    html {
-      head {
-        title { 'Streaming' }
-      }
-      body {
-        p { 1 }
-        flush # Internal private Phlex method.
-        p { 2 }
-      }
-    }
-  end
-end
-
 class SvgElem < Phlex::SVG
   def view_template
     svg { rect(width: 100, height: 100) }
@@ -75,12 +60,25 @@ class TestApp < Sinatra::Application
     phlex MoreDetailsView.new
   end
 
-  get '/stream' do
-    phlex StreamingView.new, stream: true
+  get '/more-with-layout' do
+    layout = params[:layout] == 'true' ? true : :layout_more
+    phlex MoreDetailsView.new, layout: layout
+  end
+
+  get '/more-with-haml-layout' do
+    phlex MoreDetailsView.new, layout: true, layout_engine: :haml
+  end
+
+  get '/stream-with-layout' do
+    phlex FooView.new, layout: true, stream: true
   end
 
   get '/svg' do
     phlex SvgElem.new
+  end
+
+  get '/svg-with-layout' do
+    phlex SvgElem.new, layout: true
   end
 
   get '/svg/plain' do
@@ -91,21 +89,6 @@ class TestApp < Sinatra::Application
     phlex FooView.new, content_type: :xml
   end
 end
-
-# Trick Capybara into managing Puma for us.
-class NeedsServerDriver < Capybara::Driver::Base
-  def needs_server?
-    true
-  end
-end
-
-Capybara.register_driver :needs_server do
-  NeedsServerDriver.new
-end
-
-Capybara.app = TestApp
-Capybara.default_driver = :needs_server
-Capybara.server = :puma, { Silent: true }
 
 RSpec.describe Phlex::Sinatra do
   include Rack::Test::Methods
@@ -157,15 +140,48 @@ RSpec.describe Phlex::Sinatra do
     end
   end
 
-  context 'with a Phlex::SVG view' do
-    it 'responds with the correct content type by default' do
+  context 'when a layout is passed' do
+    it 'uses the specified layout' do
+      get '/more-with-layout'
+
+      expect(last_response.body).to start_with('<div><pre>')
+    end
+
+    it "uses Sinatra's default layout when `true`" do
+      get '/more-with-layout', { layout: 'true' }
+
+      expect(last_response.body).to start_with('<main><pre>')
+    end
+
+    it 'raises an error stream=true' do
+      expect {
+        get('/stream-with-layout')
+      }.to raise_error(Phlex::Sinatra::IncompatibleOptionError)
+    end
+
+    it 'works with non-ERB templates' do
+      get '/more-with-haml-layout'
+
+      expect(last_response.body).to start_with("<article>\n<pre>")
+    end
+  end
+
+  context 'when passed a Phlex::SVG view' do
+    it 'defaults to SVG content type' do
       get '/svg'
 
       expect(last_response.body).to start_with('<svg><rect')
       expect(last_response.media_type).to eql('image/svg+xml')
     end
 
-    it 'can also specify a content type' do
+    it 'does not default to SVG content type if a layout is specified' do
+      get '/svg-with-layout'
+
+      expect(last_response.body).to start_with('<main><svg><rect')
+      expect(last_response.media_type).to eql('text/html')
+    end
+
+    it 'can also have its content type specified' do
       get '/svg/plain'
 
       expect(last_response.body).to start_with('<svg><rect')
@@ -199,26 +215,6 @@ RSpec.describe Phlex::Sinatra do
 
       expect(last_response.body).to eql('<pre>{&quot;a&quot;=&gt;&quot;1&quot;, &quot;b&quot;=&gt;&quot;2&quot;}</pre>')
       expect(last_response.media_type).to eql('text/html')
-    end
-  end
-
-  context 'when streaming' do
-    def get2(path)
-      Net::HTTP.start(
-        Capybara.current_session.server.host,
-        Capybara.current_session.server.port,
-      ) { |http|
-        http.get(path)
-      }
-    end
-
-    it 'outputs the full response' do
-      last_response = get2('/stream')
-
-      expect(last_response.body).to eql('<html><head><title>Streaming</title></head><body><p>1</p><p>2</p></body></html>')
-
-      # Indicates that Sinatra's streaming is being used.
-      expect(last_response['Content-Length']).to be_nil
     end
   end
 end

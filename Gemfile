@@ -6,6 +6,7 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'capybara'
+gem 'haml'
 gem 'puma'
 gem 'rack-test'
 gem 'rake'
