@@ -1,3 +1,7 @@
+## Version 0.4.0 - 2024-09-10
+
+- Add support for wrapping a Phlex view in a layout. Pass `layout: true` to use Sinatra's default layout or specify the view by passing a symbol. Defaults to ERB and other Sinatra templating languages can be specified via the `layout_engine:` keyword.
+
 ## Version 0.3.0 - 2023-12-13
 
 - Add support for streaming a view. Pass `stream: true` to the `#phlex` helper so Phlex will use Sinatra's streaming capability.
