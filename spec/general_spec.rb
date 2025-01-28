@@ -179,10 +179,10 @@ RSpec.describe Phlex::Sinatra do
       expect(last_response.body).to start_with('<main><pre>')
     end
 
-    it 'raises an error stream=true' do
+    it 'raises an error if stream=true' do
       expect {
         get('/stream-with-layout')
-      }.to raise_error(Phlex::Sinatra::IncompatibleOptionError)
+      }.to raise_error(Phlex::Sinatra::ArgumentError)
     end
 
     it 'works with non-ERB templates' do

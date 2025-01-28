@@ -6,7 +6,7 @@ require_relative 'phlex/sinatra/version'
 module Phlex
   module Sinatra
     Error = Class.new(StandardError)
-    IncompatibleOptionError = Class.new(Error)
+    ArgumentError = Class.new(Error)
 
     class TypeError < Error
       MAX_SIZE = 32
@@ -47,6 +47,10 @@ module Sinatra
     )
       raise Phlex::Sinatra::TypeError.new(obj) unless obj.is_a?(Phlex::SGML)
 
+      if layout && stream
+        raise Phlex::Sinatra::ArgumentError.new('streaming is not compatible with layout')
+      end
+
       content_type ||= :svg if obj.is_a?(Phlex::SVG) && !layout
       self.content_type(content_type) if content_type
 
@@ -55,10 +59,6 @@ module Sinatra
       layout = @default_layout if layout == true
 
       if stream
-        raise Phlex::Sinatra::IncompatibleOptionError.new(
-          'streaming is not compatible with layout'
-        ) if layout
-
         self.stream do |out|
           obj.call(out, view_context: self)
         end
