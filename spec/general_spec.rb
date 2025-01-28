@@ -22,7 +22,11 @@ end
 
 class MoreDetailsView < Phlex::HTML
   def view_template
-    pre { helpers.params.inspect }
+    pre {
+      helpers.params.map { |key, value|
+        "#{key.inspect} => #{value.inspect}"
+      }.join(', ')
+    }
   end
 end
 
@@ -235,7 +239,7 @@ RSpec.describe Phlex::Sinatra do
     it 'works' do
       get '/more', { a: 1, b: 2 }
 
-      expect(last_response.body).to eql('<pre>{&quot;a&quot;=&gt;&quot;1&quot;, &quot;b&quot;=&gt;&quot;2&quot;}</pre>')
+      expect(last_response.body).to eql('<pre>&quot;a&quot; =&gt; &quot;1&quot;, &quot;b&quot; =&gt; &quot;2&quot;</pre>')
       expect(last_response.media_type).to eql('text/html')
     end
   end
