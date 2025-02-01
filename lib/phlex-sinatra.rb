@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'phlex'
+require 'sinatra/base'
 require_relative 'phlex/sinatra/version'
 
 module Phlex
@@ -18,26 +19,16 @@ module Phlex
       end
     end
 
-    module SGML
-      module Overrides
-        def helpers
-          @_view_context
-        end
+    module SGMLOverrides
+      def helpers
+        @_view_context
+      end
 
-        def url(...)
-          helpers.url(...)
-        end
+      def url(...)
+        helpers.url(...)
       end
     end
-  end
 
-  class SGML
-    include Sinatra::SGML::Overrides
-  end
-end
-
-module Sinatra
-  module Templates
     def phlex(
       obj,
       content_type: nil,
@@ -45,13 +36,13 @@ module Sinatra
       layout_engine: :erb,
       stream: false
     )
-      raise Phlex::Sinatra::TypeError.new(obj) unless obj.is_a?(Phlex::SGML)
+      raise TypeError.new(obj) unless obj.is_a?(SGML)
 
       if layout && stream
-        raise Phlex::Sinatra::ArgumentError.new('streaming is not compatible with layout')
+        raise ArgumentError.new('streaming is not compatible with layout')
       end
 
-      content_type ||= :svg if obj.is_a?(Phlex::SVG) && !layout
+      content_type ||= :svg if obj.is_a?(SVG) && !layout
       self.content_type(content_type) if content_type
 
       # Copy Sinatra's behaviour and interpret layout=true as meaning "use the
@@ -73,4 +64,8 @@ module Sinatra
       end
     end
   end
+
+  SGML.include Sinatra::SGMLOverrides
 end
+
+Sinatra.helpers Phlex::Sinatra

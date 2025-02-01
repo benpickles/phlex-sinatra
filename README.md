@@ -1,22 +1,40 @@
 # phlex-sinatra
 
-[Phlex](https://github.com/phlex-ruby/phlex) already works with Sinatra (and everything else) but its normal usage leaves you without access to Sinatra's standard helper methods. This integration lets you use the `url()` helper method from within a Phlex view (along with the rest of the helper methods available in a Sinatra action).
+[Phlex](https://github.com/phlex-ruby/phlex) already works with Sinatra (and everything else) but its normal usage leaves you without access to Sinatra's standard helper methods. This extension lets you use Sinatra's `url()` helper method from within a Phlex view (along with the rest of the helper methods available in a Sinatra action).
 
 ## Installation
 
-Add phlex-sinatra to your application's Gemfile and run `bundle install`.
+Add phlex-sinatra to your application's `Gemfile` and run `bundle install`.
 
 ```ruby
 gem 'phlex-sinatra'
 ```
 
+Then require it in your app:
+
+```ruby
+require 'phlex-sinatra'
+```
+
 ## Usage
 
-To enable the integration use the `phlex` method in your Sinatra action and pass an _instance_ of the Phlex view (instead of using `.call` to get its output):
+Use the `phlex` helper method to render a Phlex view and pass an _instance_ of the Phlex view (instead of using `.call` to get its output). For a classic-style Sinatra app it'll Just Work™:
 
 ```ruby
 get '/foo' do
   phlex MyView.new
+end
+```
+
+For a modular app the extension must be explicitly registered:
+
+```ruby
+class MyApp < Sinatra::Base
+  helpers Phlex::Sinatra
+
+  get '/foo' do
+    phlex MyView.new
+  end
 end
 ```
 
