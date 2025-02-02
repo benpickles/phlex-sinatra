@@ -36,7 +36,9 @@ class SvgElem < Phlex::SVG
   end
 end
 
-class TestApp < Sinatra::Application
+class TestApp < Sinatra::Base
+  helpers Phlex::Sinatra
+
   set :environment, :test
 
   get '/error' do

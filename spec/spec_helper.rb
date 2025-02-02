@@ -2,7 +2,6 @@
 
 require 'phlex-sinatra'
 require 'rack/test'
-require 'sinatra/base'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

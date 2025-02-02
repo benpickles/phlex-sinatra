@@ -15,7 +15,9 @@ class StreamingView < Phlex::HTML
   end
 end
 
-class StreamingApp < Sinatra::Application
+class StreamingApp < Sinatra::Base
+  helpers Phlex::Sinatra
+
   set :environment, :test
 
   get '/stream' do
