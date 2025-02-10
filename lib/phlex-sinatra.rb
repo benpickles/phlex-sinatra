@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'phlex'
+require 'phlex/version'
 require 'sinatra/base'
 require_relative 'phlex/sinatra/version'
 
@@ -8,6 +9,8 @@ module Phlex
   module Sinatra
     Error = Class.new(StandardError)
     ArgumentError = Class.new(Error)
+    PHLEX_V2 = !!Phlex::VERSION[/^2\./]
+    SINATRA_VIEW_CONTEXT = :__sinatra_view_context__
 
     class TypeError < Error
       MAX_SIZE = 32
@@ -19,9 +22,19 @@ module Phlex
       end
     end
 
-    module SGMLOverrides
+    module V1SGMLOverrides
       def helpers
         @_view_context
+      end
+
+      def url(...)
+        helpers.url(...)
+      end
+    end
+
+    module V2SGMLOverrides
+      def helpers
+        context[SINATRA_VIEW_CONTEXT]
       end
 
       def url(...)
@@ -51,10 +64,10 @@ module Phlex
 
       if stream
         self.stream do |out|
-          obj.call(out, view_context: self)
+          call_with_view_context(obj, self, buffer: out)
         end
       else
-        output = obj.call(view_context: self)
+        output = call_with_view_context(obj, self)
 
         if layout
           render(layout_engine, layout, { layout: false }) { output }
@@ -63,9 +76,24 @@ module Phlex
         end
       end
     end
+
+    if PHLEX_V2
+      def call_with_view_context(obj, view_context, buffer: nil)
+        context = { SINATRA_VIEW_CONTEXT => view_context }
+        buffer ? obj.call(buffer, context:) : obj.call(context:)
+      end
+    else
+      def call_with_view_context(obj, view_context, buffer: nil)
+        buffer ? obj.call(buffer, view_context:) : obj.call(view_context:)
+      end
+    end
   end
 
-  SGML.include Sinatra::SGMLOverrides
+  if Phlex::Sinatra::PHLEX_V2
+    SGML.include Sinatra::V2SGMLOverrides
+  else
+    SGML.include Sinatra::V1SGMLOverrides
+  end
 end
 
 Sinatra.helpers Phlex::Sinatra

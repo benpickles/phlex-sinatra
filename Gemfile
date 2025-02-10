@@ -7,6 +7,7 @@ gemspec
 
 gem 'capybara'
 gem 'haml'
+gem 'phlex', github: 'phlex-ruby/phlex'
 gem 'puma'
 gem 'rack-test'
 gem 'rake'
