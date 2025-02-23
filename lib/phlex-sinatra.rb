@@ -21,11 +21,11 @@ module Phlex
 
     module SGMLOverrides
       def helpers
-        @_view_context
+        context
       end
 
       def url(...)
-        helpers.url(...)
+        context.url(...)
       end
     end
 
@@ -51,10 +51,10 @@ module Phlex
 
       if stream
         self.stream do |out|
-          obj.call(out, view_context: self)
+          obj.call(out, context: self)
         end
       else
-        output = obj.call(view_context: self)
+        output = obj.call(context: self)
 
         if layout
           render(layout_engine, layout, { layout: false }) { output }
